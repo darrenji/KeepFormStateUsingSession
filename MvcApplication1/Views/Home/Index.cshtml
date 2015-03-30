@@ -1,0 +1,89 @@
+﻿@model MvcApplication1.Models.Club
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new {id = "myForm"}))
+{
+    @Html.LabelFor(m => m.Name)
+    @Html.TextBoxFor(m => m.Name)
+    @Html.ValidationMessageFor(m => m.Name)
+
+    <br/><br/>
+    
+    <ul id="players" style="list-style-type: none">
+        @if (Model.Players != null)
+        {
+            foreach (var item in Model.Players)
+            {
+                Html.RenderAction("NewPlayerRow", "Home", new { player = @item });
+            }
+            
+        }
+    </ul>
+    <a id="addPlayer" href="javascript:void(0)">添加球员</a>
+    
+    <br/><br/>
+    
+    <div>
+        <a href="javascript:void(0)"  id="gotoOther">到别的地方转转</a> &nbsp;
+        <input type="submit" id="up" value="提交" />
+    </div>
+}
+
+@section scripts
+{
+    <script src="~/Scripts/dynamicvalidation.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            //添加关于Player的新行
+            $('#addPlayer').on("click", function() {
+                createPlayerRow();
+            });
+
+            //到别的页
+            $('#gotoOther').on("click", function() {
+                if ($('#myForm').valid()) {
+                    $.ajax({
+                        cache: false,
+                        url: '@Url.Action("BeforeGoToMustSave", "Home")',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: $('#myForm').serialize(),
+                        success: function (data) {
+                            if (data.msg) {
+                                window.location.href = '@Url.Action("RealGoTo", "Home")';
+                            }
+                        },
+                        error: function (xhr, status) {
+                            alert("添加失败，状态码：" + status);
+                        }
+                    });
+                }
+            });
+        });
+
+        //添加品牌行
+        function createPlayerRow() {
+            $.ajax({
+                cache: false,
+                url: '@Url.Action("NewPlayerRow", "Home")',
+                type: "GET",
+                data: {},
+                success: function (data) {
+                    $('#players').append(data);
+                    $.validator.unobtrusive.parseDynamicContent('#players li:last', "#myForm");
+
+                },
+                error: function (xhr, status) {
+                    alert("添加行失败，状态码：" + status);
+                }
+            });
+        }
+    </script>
+}

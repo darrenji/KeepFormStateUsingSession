@@ -1,0 +1,16 @@
+﻿@using MvcApplication1.Extension
+@model MvcApplication1.Models.Player
+
+<li  class="newcarcolorli">
+     @using (Html.BeginCollectionItem("Players")) 
+     {
+        @Html.HiddenFor(model => model.Id)
+         <div>
+             @Html.LabelFor(m => m.Name)
+             @Html.TextBoxFor(m => m.Name)
+             @Html.ValidationMessageFor(m => m.Name)
+         </div>  
+     }
+</li>
+
+
